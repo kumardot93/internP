@@ -26,8 +26,15 @@ export class BankSearchComponent implements OnInit {
   displayedColumns: string[] = ['fav', 'sno', 'bank_name', 'ifsc', 'branch', 'address', 'city', 'district', 'state'];
   matBankList: MatTableDataSource<Bank> = new MatTableDataSource<Bank>([]);
 
+  pageSize: number = this.allowedPageSizes[0];
+
   myLocalStorage = window.localStorage;
   favouriteMappedById: { [key: number]: boolean; } = {};
+
+  scheduledAPICallForBanks: any = -1;
+  abortController: AbortController | null = null;
+
+  scheduledCityCache: any = -1;
 
   hasNextPage: 0 | 1 = 1;
   isLoading: boolean = false;
@@ -39,7 +46,7 @@ export class BankSearchComponent implements OnInit {
     this.favouriteMappedById = JSON.parse(this.myLocalStorage.getItem('favouriteBanks') || '{}');
 
     this.isLoading = true;
-    const url = new URL(environment.DJANGO_SERVER + `/branches?q=&limit=${this.allowedPageSizes[0]}&offset=${this.bankList.length}`);
+    const url = new URL(environment.DJANGO_SERVER + `/branches?q=${this.searchInput}&limit=${this.allowedPageSizes[0]}&offset=${this.bankList.length}`);
     fetch(url.toString()).then(response => response.json()).then((response: { branches: Array<Bank>; }) => {
       this.bankList = response.branches;
       this.matBankList = new MatTableDataSource<Bank>(this.bankList.map((b, i) => {
@@ -50,24 +57,51 @@ export class BankSearchComponent implements OnInit {
     console.log('this: ', this);
   }
 
-  updateCityCache(): void {
+  updateCityCache = (limit: number = 20) => {
     let i = 0;
     this.cityCache = [];
 
     const searchInput = this.citySearchInput.toLocaleUpperCase();
 
-    for (i = 0; i < CITY_LIST.length && this.cityCache.length <= 50; i++) {
+    for (i = 0; i < CITY_LIST.length && this.cityCache.length <= limit; i++) {
       if (CITY_LIST[i].startsWith(searchInput)) {
         this.cityCache.push(CITY_LIST[i]);
       }
     }
 
-    for (i = 0; i < CITY_LIST.length && this.cityCache.length <= 50; i++) {
+    for (i = 0; i < CITY_LIST.length && this.cityCache.length <= limit; i++) {
       if (!CITY_LIST[i].startsWith(searchInput) && CITY_LIST[i].includes(searchInput)) {
         this.cityCache.push(CITY_LIST[i]);
       }
     }
 
+  };
+
+  handleCitySearchInputChange() {
+    clearTimeout(this.scheduledCityCache);
+    this.scheduledCityCache = setTimeout(this.updateCityCache, 500);
+  }
+
+  handleSearchInput() {
+    clearTimeout(this.scheduledAPICallForBanks);
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.isLoading = true;
+    this.scheduledAPICallForBanks = setTimeout(() => {
+      const url = new URL(environment.DJANGO_SERVER + `/branches?q=${this.searchInput}&limit=${this.pageSize}&offset=0`);
+      this.abortController = new AbortController();
+      fetch(url.toString(), { signal: this.abortController.signal })
+        .then(response => response.json())
+        .then((response: { branches: Array<Bank>; }) => {
+          this.bankList = response.branches;
+          this.matBankList = new MatTableDataSource<Bank>(this.bankList.map((b, i) => {
+            return { ...b, sno: i + 1 };
+          }));
+          this.isLoading = false;
+        })
+        .catch(err => { });
+    }, 500);
   }
 
   pageChange(event: any): void {
@@ -85,7 +119,7 @@ export class BankSearchComponent implements OnInit {
         return { ...b, sno: i + 1 + startIndex };
       }));
 
-      const url = new URL(environment.DJANGO_SERVER + `/branches?q=&limit=${endIndex - this.bankList.length}&offset=${this.bankList.length}`);
+      const url = new URL(environment.DJANGO_SERVER + `/branches?q=${this.searchInput}&limit=${endIndex - this.bankList.length}&offset=${this.bankList.length}`);
       fetch(url.toString())
         .then(response => response.json())
         .then((response: { branches: Array<Bank>; }) => {
@@ -99,6 +133,7 @@ export class BankSearchComponent implements OnInit {
           this.isLoading = false;
         });
     }
+    this.pageSize = event.pageSize;
   }
 
   toggleFavoutite(id: number) {

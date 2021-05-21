@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  DJANGO_SERVER: 'https://assign-intern.herokuapp.com/api',
+  DJANGO_SERVER: 'http://localhost:8000/api',
 };
 
 /*
