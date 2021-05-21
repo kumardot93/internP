@@ -1,1 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; overflow-x: hidden;}
+
+.container{
+    width: 86vw;
+    padding: 16px;
+}
+
+@media only screen and (max-width: 900px){
+    .container{
+        width: calc(100vw - 8px);
+        padding-left: 32px;
+    }
+}

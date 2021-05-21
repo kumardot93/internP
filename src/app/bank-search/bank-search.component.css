@@ -1,0 +1,19 @@
+.bigSearch{
+    width: 400px;
+    margin-left: 32px;
+}
+
+::ng-deep .mat-paginator .mat-paginator-outer-container .mat-paginator-container .mat-paginator-range-actions .mat-paginator-range-label{
+    display: none !important;
+}
+
+td{
+    padding: 32px;
+}
+
+@media only screen and (max-width: 900px){
+    .bigSearch{
+        width: calc(100% - 32px);
+        margin-left: unset;
+    }
+}

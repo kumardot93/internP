@@ -1,0 +1,89 @@
+<div class="container mat-elevation-z8">
+    <ng-container *ngIf="isLoading">
+        <mat-progress-bar style="position: absolute; top:0; left: 0;" mode="indeterminate"></mat-progress-bar>
+    </ng-container>
+    <mat-form-field>
+        <mat-label>Select City</mat-label>
+        <mat-select>
+            <mat-option style="pointer-events: none;">
+                <div style="pointer-events: auto; display: flex; flex-direction: row; align-items: center;"
+                    (click)="$event.stopPropagation()">
+                    <input style="flex-grow: 1;" matInput placeholder="Search..." [(ngModel)]="citySearchInput"
+                        (keypress)="$event.key=='Enter'?updateCityCache():null; $event.stopPropagation();"
+                        (keydown)="$event.stopPropagation()" (keyup)="$event.stopPropagation()">
+                    <mat-icon style="color: black; cursor: pointer;" (click)="updateCityCache()">search</mat-icon>
+                </div>
+            </mat-option>
+            <mat-option [value]="null">None</mat-option>
+            <ng-container *ngFor="let city of cityCache">
+                <mat-option [value]="city">{{cityCache}}</mat-option>
+            </ng-container>
+            <mat-option>
+                <div style="width: 100%; height: 100%;">more...</div>
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="bigSearch">
+        <mat-label>Search...</mat-label>
+        <input matInput [(ngModel)]="searchInput">
+    </mat-form-field>
+
+    <br />
+    <div style="overflow: auto; width: 100%;">
+        <table style="width: 100%;" mat-table [dataSource]="matBankList">
+
+            <ng-container matColumnDef="sno">
+                <th mat-header-cell *matHeaderCellDef> No. </th>
+                <td style="padding-right: 4px;" mat-cell *matCellDef="let element"> {{element.sno}} </td>
+            </ng-container>
+
+
+            <ng-container matColumnDef="bank_name">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> Name </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.bank_name}} </td>
+            </ng-container>
+
+
+            <ng-container matColumnDef="ifsc">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> ISFC </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.ifsc}} </td>
+            </ng-container>
+
+
+            <ng-container matColumnDef="branch">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> Branch </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.branch}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="address">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> Address </th>
+                <td style="width: 180px; padding: 0 4px; padding-right: 20px;" mat-cell *matCellDef="let element">
+                    {{element.address}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="city">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> City </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.city}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="district">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> District </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.district}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="state">
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> State </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.state}} </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[10, 20, 30, 50, 100]" [length]="bankList.length+hasNextPage"
+            (page)="pageChange($event); log($event)">
+        </mat-paginator>
+    </div>
+
+</div>
