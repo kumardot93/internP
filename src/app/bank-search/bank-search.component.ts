@@ -3,9 +3,11 @@ import { CITY_LIST } from './../classes/city.const';
 import { environment } from './../../environments/environment';
 
 import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
 
 import { Bank } from './../classes/bank.model';
 
+import { BankComponent } from './../bank/bank.component';
 
 @Component({
   selector: 'app-bank-search',
@@ -39,7 +41,7 @@ export class BankSearchComponent implements OnInit {
   hasNextPage: 0 | 1 = 1;
   isLoading: boolean = false;
 
-  constructor() { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit(): void {
 
@@ -148,6 +150,12 @@ export class BankSearchComponent implements OnInit {
 
   log(msg: any) {
     console.log('LOG: ', msg);
+  }
+
+  openDialog(bank: Bank) {
+    const dialogRef = this.dialog.open(BankComponent, {
+      data: { bank }
+    });
   }
 
 }

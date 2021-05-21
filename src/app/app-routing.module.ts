@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { BankSearchComponent } from './bank-search/bank-search.component';
 
 const routes: Routes = [
-  { path: '', component: BankSearchComponent }
+  { path: '', component: BankSearchComponent },
 ];
 
 @NgModule({

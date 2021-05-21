@@ -53,7 +53,8 @@
 
             <ng-container matColumnDef="bank_name">
                 <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> Name </th>
-                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.bank_name}} </td>
+                <td style="padding: 0 4px; color: blue; cursor: pointer;" mat-cell *matCellDef="let element"
+                    (click)="openDialog(element)"> {{element.bank_name}} </td>
             </ng-container>
 
 

@@ -1,0 +1,8 @@
+.row{
+    display: flex;
+    flex-direction: row;
+}
+
+span{
+    margin-right: 4px;
+}
