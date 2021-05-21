@@ -5,7 +5,7 @@ import { environment } from './../../environments/environment';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Bank } from './../classes/bank.model';
-import { start } from 'repl';
+
 
 @Component({
   selector: 'app-bank-search',
@@ -14,6 +14,8 @@ import { start } from 'repl';
 })
 export class BankSearchComponent implements OnInit {
 
+  allowedPageSizes: Array<number> = [10, 20, 30, 50, 100];
+
   cityCache: Array<string> = CITY_LIST.slice(0, 50);
 
   citySearchInput: string = '';
@@ -21,8 +23,11 @@ export class BankSearchComponent implements OnInit {
 
   bankList: Array<Bank> = [];
 
-  displayedColumns: string[] = ['sno', 'bank_name', 'ifsc', 'branch', 'address', 'city', 'district', 'state'];
+  displayedColumns: string[] = ['fav', 'sno', 'bank_name', 'ifsc', 'branch', 'address', 'city', 'district', 'state'];
   matBankList: MatTableDataSource<Bank> = new MatTableDataSource<Bank>([]);
+
+  myLocalStorage = window.localStorage;
+  favouriteMappedById: { [key: number]: boolean; } = {};
 
   hasNextPage: 0 | 1 = 1;
   isLoading: boolean = false;
@@ -30,9 +35,11 @@ export class BankSearchComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    // new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+
+    this.favouriteMappedById = JSON.parse(this.myLocalStorage.getItem('favouriteBanks') || '{}');
+
     this.isLoading = true;
-    const url = new URL(environment.DJANGO_SERVER + `/branches?q=&limit=${this.pageSize}&offset=${this.bankList.length}`);
+    const url = new URL(environment.DJANGO_SERVER + `/branches?q=&limit=${this.allowedPageSizes[0]}&offset=${this.bankList.length}`);
     fetch(url.toString()).then(response => response.json()).then((response: { branches: Array<Bank>; }) => {
       this.bankList = response.branches;
       this.matBankList = new MatTableDataSource<Bank>(this.bankList.map((b, i) => {
@@ -74,7 +81,9 @@ export class BankSearchComponent implements OnInit {
     }
     else if (this.hasNextPage) {
       this.isLoading = true;
-      this.matBankList = new MatTableDataSource<Bank>([]);
+      this.matBankList = new MatTableDataSource<Bank>(this.bankList.slice(startIndex, endIndex).map((b, i) => {
+        return { ...b, sno: i + 1 + startIndex };
+      }));
 
       const url = new URL(environment.DJANGO_SERVER + `/branches?q=&limit=${endIndex - this.bankList.length}&offset=${this.bankList.length}`);
       fetch(url.toString())
@@ -90,6 +99,16 @@ export class BankSearchComponent implements OnInit {
           this.isLoading = false;
         });
     }
+  }
+
+  toggleFavoutite(id: number) {
+    if (this.favouriteMappedById[id]) {
+      delete this.favouriteMappedById[id];
+    }
+    else {
+      this.favouriteMappedById[id] = true;
+    }
+    this.myLocalStorage.setItem('favouriteBanks', JSON.stringify(this.favouriteMappedById));
   }
 
   log(msg: any) {

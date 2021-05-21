@@ -9,5 +9,4 @@ export interface Bank {
     district: string;
     state: string;
     bank_name: string;
-    favourite?: boolean;
 }

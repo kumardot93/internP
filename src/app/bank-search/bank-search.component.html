@@ -1,6 +1,6 @@
 <div class="container mat-elevation-z8">
     <ng-container *ngIf="isLoading">
-        <mat-progress-bar style="position: absolute; top:0; left: 0;" mode="indeterminate"></mat-progress-bar>
+        <mat-progress-bar style="position: fixed; top:0; left: 0;" mode="indeterminate"></mat-progress-bar>
     </ng-container>
     <mat-form-field>
         <mat-label>Select City</mat-label>
@@ -33,9 +33,19 @@
     <div style="overflow: auto; width: 100%;">
         <table style="width: 100%;" mat-table [dataSource]="matBankList">
 
+            <ng-container matColumnDef="fav">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td style="padding-right: 4px; padding-left: 6px;" mat-cell *matCellDef="let element">
+                    <mat-icon [style.color]="favouriteMappedById[element.id]?'#FFD700':'lightgrey'"
+                        style="cursor: pointer;" (click)="toggleFavoutite(element.id)">
+                        {{favouriteMappedById[element.id]?'star':'star_border'}}
+                    </mat-icon>
+                </td>
+            </ng-container>
+
             <ng-container matColumnDef="sno">
-                <th mat-header-cell *matHeaderCellDef> No. </th>
-                <td style="padding-right: 4px;" mat-cell *matCellDef="let element"> {{element.sno}} </td>
+                <th style="padding: 0 4px;" mat-header-cell *matHeaderCellDef> No. </th>
+                <td style="padding: 0 4px;" mat-cell *matCellDef="let element"> {{element.sno}} </td>
             </ng-container>
 
 
@@ -81,7 +91,7 @@
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
-        <mat-paginator [pageSizeOptions]="[10, 20, 30, 50, 100]" [length]="bankList.length+hasNextPage"
+        <mat-paginator [pageSizeOptions]="allowedPageSizes" [length]="bankList.length+hasNextPage"
             (page)="pageChange($event); log($event)">
         </mat-paginator>
     </div>
